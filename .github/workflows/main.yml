@@ -3,7 +3,7 @@ name: Merge Đề Thi PDFs
 on:
   push:
     branches:
-      - add-pdf-merge-workflow2
+      - add-pdf-merge-workflow3
   workflow_dispatch:
 
 jobs:
