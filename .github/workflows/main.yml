@@ -31,6 +31,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add Tong_hop_de_thi_lop_6.pdf
+          git add Tong_hop_de_lop_6.pdf
           git commit -m "Chore: Update merged PDF file" || echo "No changes to commit"
           git push || echo "Push failed"
