@@ -2,7 +2,6 @@
 """Script to merge all PDF files in the repository into one file."""
 
 import os
-from pathlib import Path
 from PyPDF2 import PdfMerger
 
 def merge_pdfs():
@@ -44,7 +43,6 @@ def merge_pdfs():
         
         print(f"✓ Successfully created {output_file}")
         print(f"  File size: {file_size_mb:.2f} MB")
-        print(f"  Total pages: Please check the output file")
         
     except Exception as e:
         print(f"Error during merge: {e}")
