@@ -1,53 +1,35 @@
-#!/usr/bin/env python3
-"""Script to merge all PDF files in the repository into one file."""
-
 import os
 from PyPDF2 import PdfMerger
 
 def merge_pdfs():
-    """Merge all PDF files in the current directory into one file."""
+    """Merge all PDF files in the repository into a single PDF."""
+    pdf_merger = PdfMerger()
     
-    # Get all PDF files in the repository root directory
-    pdf_files = sorted([f for f in os.listdir('.') if f.endswith('.pdf')])
+    # Find all PDF files (excluding the output file)
+    pdf_files = []
+    for root, dirs, files in os.walk('.'):
+        # Skip hidden directories like .github
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        
+        for file in sorted(files):
+            if file.endswith('.pdf') and file != 'Tong_hop_de_thi_lop_6.pdf':
+                pdf_files.append(os.path.join(root, file))
     
+    # Merge PDFs
     if not pdf_files:
-        print("No PDF files found!")
+        print("No PDF files found to merge")
         return
     
-    print(f"Found {len(pdf_files)} PDF files to merge:")
-    for pdf in pdf_files:
-        print(f"  - {pdf}")
+    print(f"Merging {len(pdf_files)} PDF files...")
+    for pdf_file in pdf_files:
+        print(f"  Adding: {pdf_file}")
+        pdf_merger.append(pdf_file)
     
-    # Create merger object
-    merger = PdfMerger()
-    
-    try:
-        # Add all PDFs to merger
-        for pdf_file in pdf_files:
-            print(f"Adding {pdf_file}...")
-            try:
-                merger.append(pdf_file)
-            except Exception as e:
-                print(f"Warning: Could not add {pdf_file}: {e}")
-                continue
-        
-        # Write merged PDF
-        output_file = "Tong_hop_de_thi_lop_6.pdf"
-        print(f"\nMerging into {output_file}...")
-        merger.write(output_file)
-        merger.close()
-        
-        # Get file size
-        file_size = os.path.getsize(output_file)
-        file_size_mb = file_size / (1024 * 1024)
-        
-        print(f"✓ Successfully created {output_file}")
-        print(f"  File size: {file_size_mb:.2f} MB")
-        
-    except Exception as e:
-        print(f"Error during merge: {e}")
-        merger.close()
-        raise
+    # Write the merged PDF
+    output_file = 'Tong_hop_de_thi_lop_6.pdf'
+    pdf_merger.write(output_file)
+    pdf_merger.close()
+    print(f"Successfully created: {output_file}")
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     merge_pdfs()
