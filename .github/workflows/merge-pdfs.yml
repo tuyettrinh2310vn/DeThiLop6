@@ -31,10 +31,6 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          if git diff --quiet; then
-            echo "No changes to commit"
-          else
-            git add Tong_hop_de_thi_lop_6.pdf
-            git commit -m "Chore: Update merged PDF file"
-            git push
-          fi
+          git add Tong_hop_de_thi_lop_6.pdf
+          git commit -m "Chore: Update merged PDF file" || echo "No changes to commit"
+          git push || echo "Push failed"
