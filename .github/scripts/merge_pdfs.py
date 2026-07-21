@@ -1,43 +1,46 @@
 #!/usr/bin/env python3
-"""Script to extract only question parts from PDFs and merge them."""
+"""Script to extract only question parts from PDFs and merge them using PyMuPDF."""
 
 import os
+import fitz  # PyMuPDF
 from PyPDF2 import PdfReader, PdfWriter
 
 def find_solution_start_page(pdf_file):
-    """Find the page number where solution section starts."""
+    """Find the page number where solution section starts using PyMuPDF."""
     try:
-        reader = PdfReader(pdf_file)
+        doc = fitz.open(pdf_file)
         
-        for page_idx in range(len(reader.pages)):
-            page = reader.pages[page_idx]
-            
-            try:
-                text = page.extract_text() or ""
-            except:
-                text = ""
+        for page_idx in range(len(doc)):
+            page = doc[page_idx]
+            # Extract text from page
+            text = page.get_text()
             
             # Check for solution marker
             if "HƯỚNG DẪN GIẢI CHI TIẾT" in text:
+                print(f"      Found marker at page {page_idx + 1}")
+                doc.close()
                 return page_idx  # Return 0-indexed page number
         
+        doc.close()
         return None  # No solution section found
     
     except Exception as e:
-        print(f"Error reading {pdf_file}: {e}")
+        print(f"Error reading {pdf_file} with PyMuPDF: {e}")
         return None
 
 def extract_question_pages(pdf_file):
     """Extract only question pages (before solution section)."""
     try:
-        reader = PdfReader(pdf_file)
-        
-        # Find where solution starts
+        # Find where solution starts using PyMuPDF
         solution_page = find_solution_start_page(pdf_file)
+        
+        # Use PyPDF2 to get total page count
+        reader = PdfReader(pdf_file)
+        total_pages = len(reader.pages)
         
         if solution_page is None:
             # No solution section, keep all pages
-            return list(range(len(reader.pages))), None
+            return list(range(total_pages)), None
         else:
             # Keep pages BEFORE solution section
             return list(range(solution_page)), solution_page
@@ -69,6 +72,7 @@ def main():
     
     print("="*80)
     print(f"PROCESSING {len(all_files)} FILES - EXTRACTING QUESTIONS ONLY")
+    print("Using PyMuPDF for superior PDF text extraction")
     print("="*80)
     
     # Create ONE final merger object
@@ -80,7 +84,7 @@ def main():
         print(f"\n[{file_num}/{len(all_files)}] {pdf_file}")
         
         try:
-            # Open this file
+            # Open this file with PyPDF2
             reader = PdfReader(pdf_file)
             original_page_count = len(reader.pages)
             print(f"  Original pages: {original_page_count}")
@@ -118,24 +122,27 @@ def main():
     print(f"File size: {output_size:.2f} MB")
     print(f"{'='*80}")
     
-    # FINAL VERIFICATION
+    # FINAL VERIFICATION using PyMuPDF
     print(f"\nFINAL VERIFICATION: Checking for solution text in output...")
     print(f"{'='*80}")
     
-    verify_reader = PdfReader(output_file)
-    output_page_count = len(verify_reader.pages)
+    verify_doc = fitz.open(output_file)
+    output_page_count = len(verify_doc)
     print(f"Output file has: {output_page_count} total pages\n")
     
     violation_pages = []
     
-    for page_idx in range(len(verify_reader.pages)):
+    for page_idx in range(len(verify_doc)):
         try:
-            text = verify_reader.pages[page_idx].extract_text() or ""
+            page = verify_doc[page_idx]
+            text = page.get_text()
         except:
             text = ""
         
         if "HƯỚNG DẪN GIẢI CHI TIẾT" in text:
             violation_pages.append(page_idx + 1)
+    
+    verify_doc.close()
     
     print(f"{'='*80}")
     if len(violation_pages) == 0:
